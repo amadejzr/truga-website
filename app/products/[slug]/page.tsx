@@ -6,7 +6,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Navigation } from '../../components/Navigation';
 import { Footer } from '../../components/Footer';
-import { ReservationModal } from '../../components/ReservationModal';
+import dynamic from 'next/dynamic';
+
+const ReservationModal = dynamic(() =>
+  import('../../components/ReservationModal').then(mod => ({ default: mod.ReservationModal })),
+  { ssr: false }
+);
 import { getRoofBoxBySlug, roofBoxes } from '../../data/products';
 
 export default function ProductPage() {
@@ -319,8 +324,7 @@ export default function ProductPage() {
       <ReservationModal
         isOpen={isReservationOpen}
         onClose={() => setIsReservationOpen(false)}
-        roofBoxTitle={product.title}
-        pricePerDay={product.pricePerDay}
+        preSelection={{ boxId: product.id }}
       />
     </div>
   );

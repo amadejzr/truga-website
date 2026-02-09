@@ -57,19 +57,19 @@ const faqItems: FAQItem[] = [
     answer: 'Sprejemamo plačilo z gotovino, bančnimi karticami in bančnim nakazilom. Za podjetja izdajamo tudi račune z odloženim plačilom.',
   },
   {
-    category: 'Zavarovanje',
-    question: 'Ali je strešni kovček zavarovan?',
-    answer: 'Da, vsi naši strešni kovčki so zavarovani za primer poškodb pri normalni uporabi. Zavarovanje je vključeno v ceno najema.',
+    category: 'Varščina',
+    question: 'Kako deluje varščina?',
+    answer: 'Ob prevzemu kovčka plačate varščino, ki jo v celoti prejmete nazaj ob vrnitvi nepoškodovanega kovčka. Višina varščine je odvisna od modela kovčka — točen znesek vam sporočimo ob rezervaciji.',
   },
   {
-    category: 'Zavarovanje',
+    category: 'Varščina',
     question: 'Kaj se zgodi v primeru poškodbe?',
-    answer: 'Manjše poškodbe pri normalni uporabi so krite z zavarovanjem. V primeru hujših poškodb ali izgube se zadrži kavcija. Priporočamo, da kovček pred uporabo pregledate in nas obvestite o morebitnih poškodbah.',
+    answer: 'V primeru poškodb se varščina zadrži delno ali v celoti, odvisno od obsega poškodbe. Priporočamo, da kovček pred uporabo pregledate in nas ob vrnitvi obvestite o morebitnih poškodbah.',
   },
   {
-    category: 'Zavarovanje',
-    question: 'Ali pokrivate tudi krajo?',
-    answer: 'Kraja ni krita z našim zavarovanjem. Priporočamo, da kovček vedno zaklenete s priloženim ključem in ga ne puščate brez nadzora na javnih mestih.',
+    category: 'Varščina',
+    question: 'Kaj se zgodi v primeru kraje?',
+    answer: 'V primeru kraje se varščina zadrži v celoti. Priporočamo, da kovček vedno zaklenete s priloženim ključem in ga ne puščate brez nadzora na javnih mestih.',
   },
 ];
 

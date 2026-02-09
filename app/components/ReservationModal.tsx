@@ -1,86 +1,170 @@
 'use client';
 
-import { useState } from 'react';
-import { Calendar } from './Calendar';
+import { useReducer, useRef, useEffect } from 'react';
+import type { ReservationData, RoofTypeChoice } from '../data/products';
+import { StepIndicator } from './reservation/StepIndicator';
+import { StepProductSelection } from './reservation/StepProductSelection';
+import { StepHolderSelection } from './reservation/StepHolderSelection';
+import { StepDatePicker } from './reservation/StepDatePicker';
+import { StepCustomerDetails } from './reservation/StepCustomerDetails';
+import { StepSummary } from './reservation/StepSummary';
+
+type WizardStep = 1 | 2 | 3 | 4 | 5;
+
+interface PreSelection {
+  boxId?: number;
+}
+
+interface WizardState {
+  currentStep: WizardStep;
+  data: ReservationData;
+}
+
+type WizardAction =
+  | { type: 'SELECT_BOX'; boxId: number | null }
+  | { type: 'SET_ROOF_TYPE'; roofType: RoofTypeChoice }
+  | { type: 'SET_DATES'; start: Date; end: Date }
+  | { type: 'SET_DETAIL'; field: 'name' | 'email' | 'phone' | 'vehicleDescription' | 'notes'; value: string }
+  | { type: 'GO_TO_STEP'; step: WizardStep }
+  | { type: 'NEXT_STEP' }
+  | { type: 'PREV_STEP' }
+  | { type: 'RESET'; preSelection?: PreSelection };
+
+const stepTitles: Record<WizardStep, string> = {
+  1: 'Izberite Strešni Kovček',
+  2: 'Tip Strehe',
+  3: 'Izberite Datum',
+  4: 'Vaši Podatki',
+  5: 'Pregled Povpraševanja',
+};
+
+function createInitialState(preSelection?: PreSelection): WizardState {
+  return {
+    currentStep: 1,
+    data: {
+      selectedBoxId: preSelection?.boxId ?? null,
+      roofType: null,
+      startDate: null,
+      endDate: null,
+      name: '',
+      email: '',
+      phone: '',
+      vehicleDescription: '',
+      notes: '',
+    },
+  };
+}
+
+function wizardReducer(state: WizardState, action: WizardAction): WizardState {
+  switch (action.type) {
+    case 'SELECT_BOX':
+      return { ...state, data: { ...state.data, selectedBoxId: action.boxId } };
+
+    case 'SET_ROOF_TYPE':
+      return { ...state, data: { ...state.data, roofType: action.roofType } };
+
+    case 'SET_DATES':
+      return { ...state, data: { ...state.data, startDate: action.start, endDate: action.end } };
+
+    case 'SET_DETAIL':
+      return { ...state, data: { ...state.data, [action.field]: action.value } };
+
+    case 'GO_TO_STEP':
+      return { ...state, currentStep: action.step };
+
+    case 'NEXT_STEP': {
+      const next = Math.min(state.currentStep + 1, 5) as WizardStep;
+      return { ...state, currentStep: next };
+    }
+
+    case 'PREV_STEP': {
+      const prev = Math.max(state.currentStep - 1, 1) as WizardStep;
+      return { ...state, currentStep: prev };
+    }
+
+    case 'RESET':
+      return createInitialState(action.preSelection);
+
+    default:
+      return state;
+  }
+}
+
+function isStepValid(step: WizardStep, data: ReservationData): boolean {
+  switch (step) {
+    case 1:
+      return true; // Box selection is optional
+    case 2:
+      return data.roofType !== null;
+    case 3:
+      return data.startDate !== null && data.endDate !== null;
+    case 4:
+      return (
+        data.name.trim().length > 0 &&
+        data.email.trim().length > 0 &&
+        data.phone.trim().length > 0 &&
+        data.vehicleDescription.trim().length > 0
+      );
+    case 5:
+      return true;
+    default:
+      return false;
+  }
+}
 
 interface ReservationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  roofBoxTitle?: string;
-  pricePerDay?: number;
+  preSelection?: PreSelection;
 }
 
-export function ReservationModal({
-  isOpen,
-  onClose,
-  roofBoxTitle = 'Strešni Kovček',
-  pricePerDay = 20
-}: ReservationModalProps) {
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+export function ReservationModal({ isOpen, onClose, preSelection }: ReservationModalProps) {
+  const [state, dispatch] = useReducer(wizardReducer, preSelection, createInitialState);
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  // Sample unavailable dates (you can fetch these from your backend)
-  const unavailableDates = [
-    new Date(2026, 1, 10),
-    new Date(2026, 1, 11),
-    new Date(2026, 1, 12),
-    new Date(2026, 1, 20),
-  ];
+  const { currentStep, data } = state;
 
-  const calculateDays = () => {
-    if (!startDate || !endDate) return 0;
-    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
+  // Scroll to top on step change
+  useEffect(() => {
+    contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
 
-  const calculateTotal = () => {
-    const days = calculateDays();
-    if (days === 0) return 0;
-
-    // Apply discounts for longer rentals
-    let discount = 0;
-    if (days >= 7) discount = 0.15; // 15% off for 7+ days
-    else if (days >= 3) discount = 0.10; // 10% off for 3+ days
-
-    const total = days * pricePerDay * (1 - discount);
-    return total;
-  };
-
-  const formatDate = (date: Date | null) => {
-    if (!date) return '-';
-    return date.toLocaleDateString('sl-SI', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle reservation submission
-    console.log({ startDate, endDate, name, email, phone, total: calculateTotal() });
-    alert('Rezervacija oddana! V kratkem vas bomo kontaktirali.');
-    onClose();
-  };
+  // Reset when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      dispatch({ type: 'RESET', preSelection });
+    }
+  }, [isOpen, preSelection]);
 
   if (!isOpen) return null;
 
-  const days = calculateDays();
-  const total = calculateTotal();
-  const hasDiscount = days >= 3;
+  const completedSteps = new Set<number>();
+  for (let s = 1; s < currentStep; s++) completedSteps.add(s);
+
+  const canProceed = isStepValid(currentStep, data);
+
+  const handleNext = () => {
+    if (currentStep === 5) {
+      console.log('Inquiry submitted:', data);
+      alert('Povpraševanje oddano! V kratkem vas bomo kontaktirali.');
+      onClose();
+      return;
+    }
+    dispatch({ type: 'NEXT_STEP' });
+  };
+
+  const handleBack = () => {
+    dispatch({ type: 'PREV_STEP' });
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-stone-50 dark:bg-zinc-900 rounded-[2rem] max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="bg-stone-50 dark:bg-zinc-900 rounded-[2rem] max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-zinc-800 to-green-800 dark:from-zinc-900 dark:to-green-900 text-stone-50 p-6 rounded-t-[2rem] flex items-center justify-between">
+        <div className="bg-gradient-to-r from-zinc-800 to-green-800 dark:from-zinc-900 dark:to-green-900 text-stone-50 px-6 py-5 rounded-t-[2rem] flex items-center justify-between shrink-0">
           <div>
-            <h2 className="text-3xl font-bold mb-1">Rezervacija</h2>
-            <p className="text-stone-200">{roofBoxTitle}</p>
+            <h2 className="text-xl font-bold">{stepTitles[currentStep]}</h2>
+            <p className="text-sm text-stone-300">Korak {currentStep} od 5</p>
           </div>
           <button
             onClick={onClose}
@@ -93,172 +177,73 @@ export function ReservationModal({
           </button>
         </div>
 
-        <div className="p-6 md:p-8">
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Left Column - Calendar */}
-              <div>
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-stone-50 mb-4">
-                  Izberite Datum
-                </h3>
-                <Calendar
-                  onDateSelect={(start, end) => {
-                    setStartDate(start);
-                    setEndDate(end);
-                  }}
-                  unavailableDates={unavailableDates}
-                />
+        {/* Step Indicator */}
+        <div className="border-b border-stone-200 dark:border-zinc-800 shrink-0">
+          <StepIndicator currentStep={currentStep} completedSteps={completedSteps} />
+        </div>
 
-                {/* Selected Dates Display */}
-                <div className="mt-6 bg-white dark:bg-zinc-800 rounded-2xl p-6 border border-stone-200 dark:border-zinc-700">
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-semibold text-zinc-600 dark:text-stone-400">
-                        Začetek najema
-                      </label>
-                      <p className="text-lg font-bold text-zinc-900 dark:text-stone-50">
-                        {formatDate(startDate)}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-zinc-600 dark:text-stone-400">
-                        Konec najema
-                      </label>
-                      <p className="text-lg font-bold text-zinc-900 dark:text-stone-50">
-                        {formatDate(endDate)}
-                      </p>
-                    </div>
-                    {days > 0 && (
-                      <div className="pt-3 border-t border-stone-200 dark:border-zinc-700">
-                        <label className="text-sm font-semibold text-zinc-600 dark:text-stone-400">
-                          Število dni
-                        </label>
-                        <p className="text-2xl font-bold text-green-700 dark:text-green-500">
-                          {days} {days === 1 ? 'dan' : days === 2 ? 'dneva' : 'dni'}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+        {/* Step Content */}
+        <div ref={contentRef} className="flex-1 overflow-y-auto">
+          {currentStep === 1 && (
+            <StepProductSelection
+              selectedBoxId={data.selectedBoxId}
+              onSelectBox={(boxId) => dispatch({ type: 'SELECT_BOX', boxId })}
+            />
+          )}
+          {currentStep === 2 && (
+            <StepHolderSelection
+              roofType={data.roofType}
+              onSelect={(roofType) => dispatch({ type: 'SET_ROOF_TYPE', roofType })}
+            />
+          )}
+          {currentStep === 3 && (
+            <StepDatePicker
+              startDate={data.startDate}
+              endDate={data.endDate}
+              onDateSelect={(start, end) => {
+                if (start && end) dispatch({ type: 'SET_DATES', start, end });
+              }}
+            />
+          )}
+          {currentStep === 4 && (
+            <StepCustomerDetails
+              name={data.name}
+              email={data.email}
+              phone={data.phone}
+              vehicleDescription={data.vehicleDescription}
+              notes={data.notes}
+              onChange={(field, value) => dispatch({ type: 'SET_DETAIL', field, value })}
+            />
+          )}
+          {currentStep === 5 && (
+            <StepSummary
+              data={data}
+              onGoToStep={(step) => dispatch({ type: 'GO_TO_STEP', step: step as WizardStep })}
+            />
+          )}
+        </div>
 
-              {/* Right Column - Form & Summary */}
-              <div>
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-stone-50 mb-4">
-                  Vaši Podatki
-                </h3>
-
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-zinc-800 dark:text-stone-200 mb-2">
-                      Ime in Priimek *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-800 border border-stone-300 dark:border-zinc-700 text-zinc-900 dark:text-stone-50 focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all"
-                      placeholder="Janez Novak"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-zinc-800 dark:text-stone-200 mb-2">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-800 border border-stone-300 dark:border-zinc-700 text-zinc-900 dark:text-stone-50 focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all"
-                      placeholder="janez.novak@email.si"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-zinc-800 dark:text-stone-200 mb-2">
-                      Telefon *
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-800 border border-stone-300 dark:border-zinc-700 text-zinc-900 dark:text-stone-50 focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition-all"
-                      placeholder="+386 40 123 456"
-                    />
-                  </div>
-                </div>
-
-                {/* Price Summary */}
-                <div className="bg-gradient-to-br from-green-50 to-amber-50 dark:from-zinc-800 dark:to-zinc-800 rounded-2xl p-6 border-2 border-green-200 dark:border-zinc-700">
-                  <h4 className="text-lg font-bold text-zinc-900 dark:text-stone-50 mb-4">
-                    Pregled Rezervacije
-                  </h4>
-
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-zinc-700 dark:text-stone-300">Cena na dan</span>
-                      <span className="font-semibold text-zinc-900 dark:text-stone-50">{pricePerDay}€</span>
-                    </div>
-
-                    {days > 0 && (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-zinc-700 dark:text-stone-300">Število dni</span>
-                          <span className="font-semibold text-zinc-900 dark:text-stone-50">{days}</span>
-                        </div>
-
-                        {hasDiscount && (
-                          <div className="flex justify-between text-green-700 dark:text-green-500">
-                            <span className="flex items-center gap-1">
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                              </svg>
-                              Popust ({days >= 7 ? '15%' : '10%'})
-                            </span>
-                            <span className="font-semibold">
-                              -{(days * pricePerDay * (days >= 7 ? 0.15 : 0.10)).toFixed(2)}€
-                            </span>
-                          </div>
-                        )}
-
-                        <div className="pt-3 border-t-2 border-green-200 dark:border-zinc-700 flex justify-between">
-                          <span className="text-lg font-bold text-zinc-900 dark:text-stone-50">Skupaj</span>
-                          <span className="text-2xl font-bold text-green-700 dark:text-green-500">
-                            {total.toFixed(2)}€
-                          </span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {days >= 3 && (
-                    <div className="mt-4 p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
-                      <p className="text-sm text-green-900 dark:text-green-300 font-semibold">
-                        🎉 Prihranili boste {(days * pricePerDay * (days >= 7 ? 0.15 : 0.10)).toFixed(2)}€ z daljšim najemom!
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={!startDate || !endDate || !name || !email || !phone}
-                  className="mt-6 w-full bg-gradient-to-r from-green-700 to-green-800 hover:from-green-800 hover:to-green-900 disabled:from-stone-300 disabled:to-stone-400 disabled:cursor-not-allowed text-stone-50 font-bold py-4 px-8 rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:hover:translate-y-0"
-                >
-                  {!startDate || !endDate ? 'Izberite Datum' : 'Potrdi Rezervacijo'}
-                </button>
-
-                <p className="mt-4 text-sm text-center text-zinc-600 dark:text-stone-400">
-                  Po oddaji rezervacije vas bomo kontaktirali za potrditev in podrobnosti prevzema.
-                </p>
-              </div>
-            </div>
-          </form>
+        {/* Footer */}
+        <div className="border-t border-stone-200 dark:border-zinc-800 px-6 py-4 flex items-center justify-between shrink-0 bg-stone-50 dark:bg-zinc-900 rounded-b-[2rem]">
+          {currentStep > 1 ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="px-6 py-2.5 rounded-xl bg-stone-200 dark:bg-zinc-700 text-zinc-700 dark:text-stone-300 font-medium hover:bg-stone-300 dark:hover:bg-zinc-600 transition-colors"
+            >
+              Nazaj
+            </button>
+          ) : (
+            <div />
+          )}
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={!canProceed}
+            className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-green-700 to-green-800 hover:from-green-800 hover:to-green-900 disabled:from-stone-300 disabled:to-stone-400 disabled:cursor-not-allowed text-stone-50 font-bold transition-all shadow-lg hover:shadow-xl disabled:shadow-none"
+          >
+            {currentStep === 5 ? 'Pošlji Povpraševanje' : 'Naprej'}
+          </button>
         </div>
       </div>
     </div>

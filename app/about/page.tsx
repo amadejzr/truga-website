@@ -44,13 +44,13 @@ export default function AboutPage() {
                 ki večino časa leži neuporabljena v garaži?
               </p>
               <p>
-                Leta 2018 smo se odločili, da to spremenimo. Z majhno zbirko premium strešnih
-                kovčkov smo začeli ponujati storitev najema, ki omogoča dostop do kakovostne
+                Zato smo se odločili, da to spremenimo. Z izbrano ponudbo premium strešnih
+                kovčkov Thule in Yakima ponujamo storitev najema, ki omogoča dostop do kakovostne
                 opreme brez visokih stroškov nakupa.
               </p>
               <p>
-                Danes imamo v ponudbi več kot 30 strešnih kovčkov različnih velikosti in
-                blagovnih znamk, ki služijo več kot 500 zadovoljnim strankam letno.
+                V ponudbi imamo skrbno izbrane strešne kovčke in prečne nosilce za vsako
+                potovanje — od kompaktnih vikend modelov do velikih družinskih kovčkov.
               </p>
             </div>
           </div>
@@ -118,20 +118,20 @@ export default function AboutPage() {
         <div className="bg-gradient-to-br from-zinc-800 via-zinc-900 to-green-900 dark:from-zinc-900 dark:via-black dark:to-green-950 rounded-[2.5rem] p-12 md:p-16 shadow-2xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl md:text-5xl font-bold text-stone-50 mb-2">7+</div>
-              <div className="text-stone-300">Let izkušenj</div>
+              <div className="text-4xl md:text-5xl font-bold text-stone-50 mb-2">4</div>
+              <div className="text-stone-300">Modeli kovčkov</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold text-stone-50 mb-2">30+</div>
-              <div className="text-stone-300">Strešnih kovčkov</div>
+              <div className="text-4xl md:text-5xl font-bold text-stone-50 mb-2">320–750L</div>
+              <div className="text-stone-300">Razpon velikosti</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold text-stone-50 mb-2">500+</div>
-              <div className="text-stone-300">Zadovoljnih strank</div>
+              <div className="text-4xl md:text-5xl font-bold text-stone-50 mb-2">5 min</div>
+              <div className="text-stone-300">Montaža</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold text-stone-50 mb-2">98%</div>
-              <div className="text-stone-300">Zadovoljstvo</div>
+              <div className="text-4xl md:text-5xl font-bold text-stone-50 mb-2">24h</div>
+              <div className="text-stone-300">Brezplačna odpoved</div>
             </div>
           </div>
         </div>

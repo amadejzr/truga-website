@@ -15,6 +15,7 @@ export interface RoofBox {
   opening: string;
   lockType: string;
   color: string;
+  isPopular: boolean;
   description: string;
   features: string[];
   included: string[];
@@ -43,6 +44,7 @@ export const roofBoxes: RoofBox[] = [
     opening: 'Dvostranska',
     lockType: 'Centralna ključavnica',
     color: 'Črna mat',
+    isPopular: false,
     description: 'Kompaktni strešni kovček je idealen za manjša vozila in vikend izlete. Njegova aerodinamična oblika zmanjšuje porabo goriva in hrup med vožnjo. Enostavna montaža in demontaža omogočata hitro namestitev brez orodja.',
     features: [
       'Aerodinamična oblika za manjšo porabo goriva',
@@ -65,7 +67,7 @@ export const roofBoxes: RoofBox[] = [
     slug: 'standardni-kovcek',
     title: 'Standardni Kovček',
     size: '450L',
-    capacity: 'Najpopularnejša izbira',
+    capacity: 'Za 3-4 osebe na dopustu',
     price: '20€ / dan',
     pricePerDay: 20,
     image: 'https://placehold.co/800x600/2d5016/f5f5f0?text=450L+Standardni&font=montserrat',
@@ -82,6 +84,7 @@ export const roofBoxes: RoofBox[] = [
     opening: 'Dvostranska',
     lockType: 'Centralna ključavnica',
     color: 'Antracit',
+    isPopular: true,
     description: 'Naš najbolj priljubljen model združuje optimalno prostornino s praktičnostjo uporabe. Primeren za večino družinskih vozil in ponuja dovolj prostora za prtljago 3-4 oseb na daljšem potovanju.',
     features: [
       'Optimalna velikost za družinska vozila',
@@ -122,6 +125,7 @@ export const roofBoxes: RoofBox[] = [
     opening: 'Dvostranska široka',
     lockType: 'SKS ključavnica',
     color: 'Titan mat',
+    isPopular: false,
     description: 'Družinski strešni kovček ponuja izjemno prostornino za daljša potovanja celotne družine. Široko odpiranje omogoča enostavno nalaganje tudi večjih predmetov, kot so smuči ali golf oprema.',
     features: [
       'Široko odpiranje za velike predmete',
@@ -162,6 +166,7 @@ export const roofBoxes: RoofBox[] = [
     opening: 'Popolno odpiranje',
     lockType: 'Premium ključavnica z alarmom',
     color: 'Črna sijajna',
+    isPopular: false,
     description: 'Premium XL je naš največji in najbolj dovršen strešni kovček. Namenjen zahtevnim uporabnikom, ki potrebujejo maksimalno prostornino brez kompromisov glede kakovosti in varnosti.',
     features: [
       'Največja prostornina v ponudbi',
@@ -191,3 +196,72 @@ export function getRoofBoxBySlug(slug: string): RoofBox | undefined {
 export function getRoofBoxById(id: number): RoofBox | undefined {
   return roofBoxes.find((box) => box.id === id);
 }
+
+// --- Holders (prečni nosilci) ---
+
+export type HolderType = 'universal' | 'car-specific';
+export type RoofType = 'standard' | 'flush' | 'raised' | 'fixpoint';
+
+export interface Holder {
+  id: number;
+  slug: string;
+  title: string;
+  type: HolderType;
+  pricePerDay: number;
+  price: string;
+  image: string;
+  brand: string;
+  description: string;
+  compatibleRoofTypes?: RoofType[];
+  compatibleCars?: string[];
+  maxLoad: string;
+  weight: string;
+}
+
+export type RoofTypeChoice = 'raised-rails' | 'flush-rails' | 'fixed-points' | 'naked-roof' | 'have-own' | 'unsure';
+
+export interface ReservationData {
+  selectedBoxId: number | null;
+  roofType: RoofTypeChoice | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  name: string;
+  email: string;
+  phone: string;
+  vehicleDescription: string;
+  notes: string;
+}
+
+export const holders: Holder[] = [
+  {
+    id: 101,
+    slug: 'univerzalni-nosilci-standard',
+    title: 'Univerzalni Prečni Nosilci',
+    type: 'universal',
+    pricePerDay: 5,
+    price: '5€ / dan',
+    image: 'https://placehold.co/400x300/4a7c2a/f5f5f0?text=Univerzalni+Nosilci&font=montserrat',
+    brand: 'Thule',
+    description: 'Univerzalni prečni nosilci, primerni za večino vozil s strešnimi letvami.',
+    maxLoad: '75 kg',
+    weight: '4.5 kg',
+  },
+  {
+    id: 102,
+    slug: 'univerzalni-nosilci-aero',
+    title: 'Aero Prečni Nosilci',
+    type: 'universal',
+    pricePerDay: 7,
+    price: '7€ / dan',
+    image: 'https://placehold.co/400x300/2d5016/f5f5f0?text=Aero+Nosilci&font=montserrat',
+    brand: 'Thule',
+    description: 'Aerodinamični prečni nosilci za tišjo vožnjo in manjšo porabo goriva.',
+    maxLoad: '75 kg',
+    weight: '3.8 kg',
+  },
+];
+
+export function getHolderById(id: number): Holder | undefined {
+  return holders.find((h) => h.id === id);
+}
+

@@ -2,11 +2,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Navigation } from '../components/Navigation';
 import { Footer } from '../components/Footer';
-import { roofBoxes } from '../data/products';
+import { roofBoxes, holders } from '../data/products';
 
 export const metadata = {
-  title: 'Izdelki | Truga',
-  description: 'Preglejte našo ponudbo strešnih kovčkov različnih velikosti in blagovnih znamk.',
+  title: 'Naši Izdelki | Truga',
+  description: 'Preglejte našo ponudbo strešnih kovčkov in prečnih nosilcev za najem.',
 };
 
 export default function ProductsPage() {
@@ -24,17 +24,18 @@ export default function ProductsPage() {
         <div className="relative container mx-auto px-4 pt-32 pb-16">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-zinc-900 dark:text-stone-50 mb-6 leading-tight">
-              Naši strešni kovčki
+              Naši Izdelki
             </h1>
             <p className="text-xl md:text-2xl text-zinc-700 dark:text-stone-300 leading-relaxed">
-              Izberite popoln strešni kovček za vaše potrebe
+              Strešni kovčki in prečni nosilci za najem
             </p>
           </div>
         </div>
       </section>
 
-      {/* Products Grid */}
-      <section className="container mx-auto px-4 py-16 pb-24">
+      {/* Boxes Grid */}
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl font-bold text-zinc-900 dark:text-stone-50 mb-8 text-center">Strešni Kovčki</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {roofBoxes.map((product) => (
             <Link
@@ -51,10 +52,18 @@ export default function ProductsPage() {
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                   unoptimized
                 />
-                <div className="absolute top-4 left-4">
+                <div className="absolute top-4 left-4 flex gap-2">
                   <span className="bg-green-700 text-stone-50 px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
                     Na voljo
                   </span>
+                  {product.isPopular && (
+                    <span className="bg-amber-500 text-stone-50 px-3 py-2 rounded-full text-sm font-semibold shadow-lg flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      Najpopularnejši
+                    </span>
+                  )}
                 </div>
                 <div className="absolute top-4 right-4">
                   <span className="bg-stone-900/80 text-stone-50 px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
@@ -113,6 +122,78 @@ export default function ProductsPage() {
                 </div>
               </div>
             </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Holders Grid */}
+      <section className="container mx-auto px-4 py-16 pb-24">
+        <h2 className="text-3xl font-bold text-zinc-900 dark:text-stone-50 mb-8 text-center">Prečni Nosilci</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          {holders.map((holder) => (
+            <div
+              key={holder.id}
+              className="group bg-stone-50/80 dark:bg-zinc-800/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 dark:border-zinc-700/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+            >
+              {/* Image */}
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <Image
+                  src={holder.image}
+                  alt={holder.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  unoptimized
+                />
+                <div className="absolute top-4 left-4 flex gap-2">
+                  <span className="bg-green-700 text-stone-50 px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                    Na voljo
+                  </span>
+                  {holder.type === 'car-specific' && (
+                    <span className="bg-amber-500 text-stone-50 px-3 py-2 rounded-full text-sm font-semibold shadow-lg">
+                      Za specifična vozila
+                    </span>
+                  )}
+                </div>
+                <div className="absolute top-4 right-4">
+                  <span className="bg-stone-900/80 text-stone-50 px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
+                    {holder.brand}
+                  </span>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                <h2 className="text-2xl font-bold text-zinc-900 dark:text-stone-50 mb-2">
+                  {holder.title}
+                </h2>
+
+                <p className="text-zinc-600 dark:text-stone-400 mb-4">
+                  {holder.description}
+                </p>
+
+                {holder.compatibleCars && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {holder.compatibleCars.map((car) => (
+                      <span key={car} className="text-xs bg-stone-200 dark:bg-zinc-700 text-zinc-700 dark:text-stone-300 px-3 py-1 rounded-full">
+                        {car}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-4 border-t border-stone-200 dark:border-zinc-700">
+                  <div>
+                    <span className="text-3xl font-bold text-zinc-900 dark:text-stone-50">
+                      {holder.price.split(' ')[0]}
+                    </span>
+                    <span className="text-zinc-600 dark:text-stone-400"> / dan</span>
+                  </div>
+                  <span className="text-sm text-zinc-500 dark:text-stone-500">
+                    Maks. {holder.maxLoad}
+                  </span>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </section>
