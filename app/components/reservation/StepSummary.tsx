@@ -11,11 +11,10 @@ function formatDate(date: Date): string {
 }
 
 const ROOF_TYPE_LABELS: Record<RoofTypeChoice, string> = {
-  'raised-rails': 'Vzdolžni nosilci (dvignjeni)',
-  'flush-rails': 'Vzdolžni nosilci (poravnani)',
+  'naked-roof': 'Navadna streha',
+  'flush-rails': 'Poravnane letve',
+  'raised-rails': 'Dvignjene letve',
   'fixed-points': 'Fiksne točke',
-  'naked-roof': 'Gola streha',
-  'have-own': 'Že imam nosilce',
   'unsure': 'Ne vem',
 };
 
@@ -75,9 +74,7 @@ export function StepSummary({ data, onGoToStep }: StepSummaryProps) {
                 <button type="button" onClick={() => onGoToStep(2)} className="text-xs text-green-700 dark:text-green-400 font-medium hover:underline">Uredi</button>
               </div>
               <p className="font-bold text-zinc-900 dark:text-stone-50">{ROOF_TYPE_LABELS[data.roofType]}</p>
-              {data.roofType !== 'have-own' && (
-                <p className="text-xs text-zinc-500 dark:text-stone-500 mt-1">Nosilce izberemo za vas glede na tip strehe.</p>
-              )}
+              <p className="text-xs text-zinc-500 dark:text-stone-500 mt-1">Nosilce izberemo za vas glede na tip strehe.</p>
             </div>
           )
         )}

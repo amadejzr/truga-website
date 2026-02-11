@@ -10,40 +10,34 @@ const ROOF_TYPE_OPTIONS: {
   image: string;
 }[] = [
   {
-    id: 'raised-rails',
-    label: 'Vzdolžni nosilci (dvignjeni)',
-    description: 'Dvignjene strešne letve z vidnim razmikom od strehe.',
-    image: 'https://placehold.co/400x240/3d6b1f/f5f5f0?text=Dvignjeni+nosilci&font=montserrat',
+    id: 'naked-roof',
+    label: 'Navadna streha',
+    description: 'Streha brez česar koli na vrhu — brez letev, brez fiksnih točk, brez pokrovov. Popolnoma gladka streha.',
+    image: '/normal_roof.png',
   },
   {
     id: 'flush-rails',
-    label: 'Vzdolžni nosilci (poravnani)',
-    description: 'Poravnane strešne letve, ki so v ravnini s streho.',
-    image: 'https://placehold.co/400x240/2d5016/f5f5f0?text=Poravnani+nosilci&font=montserrat',
+    label: 'Poravnane letve',
+    description: 'Vidne letve vzdolž strehe, poravnane s streho. Pod letvijo NI mogoče potisniti roke — ni reže med letvijo in streho.',
+    image: '/flush_rails.png',
+  },
+  {
+    id: 'raised-rails',
+    label: 'Dvignjene letve',
+    description: 'Vidne letve vzdolž strehe z razmakom od strehe. Pod letvijo je mogoče potisniti roko in jo prijeti.',
+    image: '/roof_railing.png',
   },
   {
     id: 'fixed-points',
     label: 'Fiksne točke',
-    description: 'Vnaprej določene pritrdilne točke na strehi vozila.',
-    image: 'https://placehold.co/400x240/4a7c2a/f5f5f0?text=Fiksne+tocke&font=montserrat',
-  },
-  {
-    id: 'naked-roof',
-    label: 'Gola streha',
-    description: 'Streha brez kakršnihkoli nosilcev ali točk.',
-    image: 'https://placehold.co/400x240/5a8c3a/f5f5f0?text=Gola+streha&font=montserrat',
-  },
-  {
-    id: 'have-own',
-    label: 'Že imam nosilce',
-    description: 'Že imam prečne nosilce nameščene na vozilu.',
-    image: 'https://placehold.co/400x240/6b6b6b/f5f5f0?text=Imam+nosilce&font=montserrat',
+    description: 'Pritrdilne točke na strehi, običajno nad vsakimi vrati. Včasih so skrite pod snemljivim pokrovom ali letvico.',
+    image: '/fixed_points.png',
   },
   {
     id: 'unsure',
     label: 'Ne vem',
-    description: 'Ne vem kakšen tip strehe ima moje vozilo.',
-    image: 'https://placehold.co/400x240/b08d3e/f5f5f0?text=Ne+vem&font=montserrat',
+    description: 'Niste prepričani? Ni problema — pošljite nam fotografijo strehe vašega vozila in vam svetujemo.',
+    image: '/normal_roof.png',
   },
 ];
 
@@ -83,6 +77,11 @@ export function StepHolderSelection({ roofType, onSelect }: StepHolderSelectionP
                     alt={option.label}
                     className="w-full h-full object-cover"
                   />
+                  {option.id === 'unsure' && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <span className="text-5xl font-bold text-white">?</span>
+                    </div>
+                  )}
                   {isSelected && (
                     <div className="absolute top-2 right-2 w-6 h-6 bg-green-700 rounded-full flex items-center justify-center">
                       <svg className="w-4 h-4 text-stone-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">

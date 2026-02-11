@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { roofBoxes } from '../data/products';
@@ -8,7 +9,7 @@ interface ProductComparisonGridProps {
   onReservationClick: (boxId: number) => void;
 }
 
-export function ProductComparisonGrid({ onReservationClick }: ProductComparisonGridProps) {
+function ProductComparisonGrid({ onReservationClick }: ProductComparisonGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
       {roofBoxes.map((box) => (
@@ -82,3 +83,5 @@ export function ProductComparisonGrid({ onReservationClick }: ProductComparisonG
     </div>
   );
 }
+
+export const MemoizedProductComparisonGrid = memo(ProductComparisonGrid);

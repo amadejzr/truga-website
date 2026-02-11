@@ -202,28 +202,7 @@ export function getRoofBoxById(id: number): RoofBox | undefined {
   return roofBoxes.find((box) => box.id === id);
 }
 
-// --- Holders (prečni nosilci) ---
-
-export type HolderType = 'universal' | 'car-specific';
-export type RoofType = 'standard' | 'flush' | 'raised' | 'fixpoint';
-
-export interface Holder {
-  id: number;
-  slug: string;
-  title: string;
-  type: HolderType;
-  pricePerDay: number;
-  price: string;
-  image: string;
-  brand: string;
-  description: string;
-  compatibleRoofTypes?: RoofType[];
-  compatibleCars?: string[];
-  maxLoad: string;
-  weight: string;
-}
-
-export type RoofTypeChoice = 'raised-rails' | 'flush-rails' | 'fixed-points' | 'naked-roof' | 'have-own' | 'unsure';
+export type RoofTypeChoice = 'naked-roof' | 'flush-rails' | 'raised-rails' | 'fixed-points' | 'unsure';
 
 export interface ReservationData {
   selectedBoxId: number | null;
@@ -235,38 +214,5 @@ export interface ReservationData {
   phone: string;
   vehicleDescription: string;
   notes: string;
-}
-
-export const holders: Holder[] = [
-  {
-    id: 101,
-    slug: 'univerzalni-nosilci-standard',
-    title: 'Univerzalni Prečni Nosilci',
-    type: 'universal',
-    pricePerDay: 5,
-    price: '5€ / dan',
-    image: 'https://placehold.co/400x300/4a7c2a/f5f5f0?text=Univerzalni+Nosilci&font=montserrat',
-    brand: 'Thule',
-    description: 'Univerzalni prečni nosilci, primerni za večino vozil s strešnimi letvami.',
-    maxLoad: '75 kg',
-    weight: '4.5 kg',
-  },
-  {
-    id: 102,
-    slug: 'univerzalni-nosilci-aero',
-    title: 'Aero Prečni Nosilci',
-    type: 'universal',
-    pricePerDay: 7,
-    price: '7€ / dan',
-    image: 'https://placehold.co/400x300/2d5016/f5f5f0?text=Aero+Nosilci&font=montserrat',
-    brand: 'Thule',
-    description: 'Aerodinamični prečni nosilci za tišjo vožnjo in manjšo porabo goriva.',
-    maxLoad: '75 kg',
-    weight: '3.8 kg',
-  },
-];
-
-export function getHolderById(id: number): Holder | undefined {
-  return holders.find((h) => h.id === id);
 }
 

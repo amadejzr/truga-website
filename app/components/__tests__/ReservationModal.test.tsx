@@ -114,7 +114,7 @@ describe('ReservationModal', () => {
     render(<ReservationModal {...defaultProps} />);
     selectBoxAndAdvance();
 
-    fireEvent.click(screen.getByText('Gola streha'));
+    fireEvent.click(screen.getByText('Navadna streha'));
     expect(screen.getByText('Naprej')).not.toBeDisabled();
   });
 
@@ -126,7 +126,7 @@ describe('ReservationModal', () => {
     expect(screen.getByText('Tip Strehe')).toBeInTheDocument();
 
     // Step 2: select roof type -> 3
-    fireEvent.click(screen.getByText('Gola streha'));
+    fireEvent.click(screen.getByText('Navadna streha'));
     fireEvent.click(screen.getByText('Naprej'));
     expect(screen.getByText('Izberite Datum')).toBeInTheDocument();
   });
@@ -134,7 +134,7 @@ describe('ReservationModal', () => {
   it('disables Naprej on step 3 until dates selected', () => {
     render(<ReservationModal {...defaultProps} />);
     selectBoxAndAdvance();
-    fireEvent.click(screen.getByText('Gola streha'));
+    fireEvent.click(screen.getByText('Navadna streha'));
     fireEvent.click(screen.getByText('Naprej')); // -> step 3
 
     const nextBtn = screen.getByText('Naprej');
@@ -144,7 +144,7 @@ describe('ReservationModal', () => {
   it('clears dates when going back from step 3', () => {
     render(<ReservationModal {...defaultProps} />);
     selectBoxAndAdvance();
-    fireEvent.click(screen.getByText('Gola streha'));
+    fireEvent.click(screen.getByText('Navadna streha'));
     fireEvent.click(screen.getByText('Naprej')); // -> step 3
 
     // Select dates
@@ -190,7 +190,7 @@ describe('ReservationModal', () => {
       fireEvent.click(screen.getByText('Naprej'));
 
       // Step 2: Select roof type
-      fireEvent.click(screen.getByText('Gola streha'));
+      fireEvent.click(screen.getByText('Navadna streha'));
       fireEvent.click(screen.getByText('Naprej'));
 
       // Step 3: Select dates
@@ -209,7 +209,7 @@ describe('ReservationModal', () => {
       // Step 5: Summary
       expect(screen.getByText('Pregled Povpraševanja')).toBeInTheDocument();
       expect(screen.getByText('Standardni Kovček')).toBeInTheDocument();
-      expect(screen.getByText('Gola streha')).toBeInTheDocument();
+      expect(screen.getByText('Navadna streha')).toBeInTheDocument();
       expect(screen.getByText('Janez Novak')).toBeInTheDocument();
       expect(screen.getByText('janez@test.si')).toBeInTheDocument();
 
@@ -246,7 +246,7 @@ describe('ReservationModal', () => {
 
       // Navigate through steps
       selectBoxAndAdvance();
-      fireEvent.click(screen.getByText('Gola streha'));
+      fireEvent.click(screen.getByText('Navadna streha'));
       fireEvent.click(screen.getByText('Naprej')); // -> step 3
       fireEvent.click(screen.getByText('15'));
       fireEvent.click(screen.getByText('20'));
@@ -281,7 +281,7 @@ describe('ReservationModal', () => {
 
       // Navigate through steps
       selectBoxAndAdvance();
-      fireEvent.click(screen.getByText('Gola streha'));
+      fireEvent.click(screen.getByText('Navadna streha'));
       fireEvent.click(screen.getByText('Naprej'));
       fireEvent.click(screen.getByText('15'));
       fireEvent.click(screen.getByText('20'));
@@ -310,7 +310,7 @@ describe('ReservationModal', () => {
 
       // Navigate to end
       selectBoxAndAdvance();
-      fireEvent.click(screen.getByText('Gola streha'));
+      fireEvent.click(screen.getByText('Navadna streha'));
       fireEvent.click(screen.getByText('Naprej'));
       fireEvent.click(screen.getByText('15'));
       fireEvent.click(screen.getByText('20'));
@@ -339,7 +339,7 @@ describe('ReservationModal', () => {
       render(<ReservationModal {...defaultProps} />);
 
       selectBoxAndAdvance();
-      fireEvent.click(screen.getByText('Gola streha'));
+      fireEvent.click(screen.getByText('Navadna streha'));
       fireEvent.click(screen.getByText('Naprej'));
       fireEvent.click(screen.getByText('15'));
       fireEvent.click(screen.getByText('20'));
@@ -386,7 +386,7 @@ describe('ReservationModal', () => {
       fireEvent.click(screen.getByText('Naprej'));
 
       // Step 2: select roof type
-      fireEvent.click(screen.getByText('Že imam nosilce'));
+      fireEvent.click(screen.getByText('Navadna streha'));
       fireEvent.click(screen.getByText('Naprej'));
 
       // Step 3: select dates
@@ -409,7 +409,7 @@ describe('ReservationModal', () => {
 
       expect(screen.getByText('Pregled Povpraševanja')).toBeInTheDocument();
       expect(screen.getByText('Kompaktni Kovček')).toBeInTheDocument();
-      expect(screen.getByText('Že imam nosilce')).toBeInTheDocument();
+      expect(screen.getByText('Navadna streha')).toBeInTheDocument();
       expect(screen.getByText('Ana Krajnc')).toBeInTheDocument();
       expect(screen.getByText('ana@test.si')).toBeInTheDocument();
       expect(screen.getByText('041555666')).toBeInTheDocument();

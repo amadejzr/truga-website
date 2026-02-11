@@ -267,7 +267,7 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
               )}
               {currentStep === 3 && (() => {
                 const selectedBox = data.selectedBoxId ? getRoofBoxById(data.selectedBoxId) : null;
-                const needsHolder = data.roofType !== null && data.roofType !== 'have-own';
+                const needsHolder = data.roofType !== null;
                 return (
                   <StepDatePicker
                     startDate={data.startDate}

@@ -154,6 +154,6 @@ describe('sendInquiry', () => {
     });
 
     const callArgs = mockSend.mock.calls[0][0];
-    expect(callArgs.html).toContain('Gola streha');
+    expect(callArgs.html).toContain('Navadna streha');
   });
 });

@@ -5,11 +5,10 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const ROOF_TYPE_LABELS: Record<string, string> = {
-  'raised-rails': 'Vzdolžni nosilci (dvignjeni)',
-  'flush-rails': 'Vzdolžni nosilci (poravnani)',
+  'naked-roof': 'Navadna streha',
+  'flush-rails': 'Poravnane letve',
+  'raised-rails': 'Dvignjene letve',
   'fixed-points': 'Fiksne točke',
-  'naked-roof': 'Gola streha',
-  'have-own': 'Že imam nosilce',
   'unsure': 'Ne vem',
 };
 
