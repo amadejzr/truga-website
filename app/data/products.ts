@@ -202,7 +202,7 @@ export function getRoofBoxById(id: number): RoofBox | undefined {
   return roofBoxes.find((box) => box.id === id);
 }
 
-export type RoofTypeChoice = 'naked-roof' | 'flush-rails' | 'raised-rails' | 'fixed-points' | 'unsure';
+export type RoofTypeChoice = 'naked-roof' | 'flush-rails' | 'raised-rails' | 'fixed-points' | 'unsure' | 'other';
 
 export interface ReservationData {
   selectedBoxId: number | null;
@@ -214,5 +214,6 @@ export interface ReservationData {
   phone: string;
   vehicleDescription: string;
   notes: string;
+  roofTypeOther: string;
 }
 

@@ -16,6 +16,7 @@ const ROOF_TYPE_LABELS: Record<RoofTypeChoice, string> = {
   'raised-rails': 'Dvignjene letve',
   'fixed-points': 'Fiksne točke',
   'unsure': 'Ne vem',
+  'other': 'Drugo',
 };
 
 export function StepSummary({ data, onGoToStep }: StepSummaryProps) {
@@ -58,7 +59,16 @@ export function StepSummary({ data, onGoToStep }: StepSummaryProps) {
 
         {/* Roof type */}
         {data.roofType && (
-          data.roofType === 'unsure' ? (
+          data.roofType === 'other' ? (
+            <div className="bg-stone-100 dark:bg-zinc-800 rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-zinc-500 dark:text-stone-500 uppercase tracking-wider">Tip strehe</h3>
+                <button type="button" onClick={() => onGoToStep(2)} className="text-xs text-green-700 dark:text-green-400 font-medium hover:underline">Uredi</button>
+              </div>
+              <p className="font-bold text-zinc-900 dark:text-stone-50">Drugo</p>
+              <p className="text-sm text-zinc-600 dark:text-stone-400 mt-1">{data.roofTypeOther}</p>
+            </div>
+          ) : data.roofType === 'unsure' ? (
             <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-2xl p-4">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-zinc-500 dark:text-stone-500 uppercase tracking-wider">Tip strehe</h3>

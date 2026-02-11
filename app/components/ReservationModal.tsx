@@ -21,14 +21,17 @@ interface PreSelection {
 interface WizardState {
   currentStep: WizardStep;
   data: ReservationData;
+  editingFromSummary: boolean;
 }
 
 type WizardAction =
   | { type: 'SELECT_BOX'; boxId: number | null }
   | { type: 'SET_ROOF_TYPE'; roofType: RoofTypeChoice }
+  | { type: 'SET_ROOF_TYPE_OTHER'; text: string }
   | { type: 'SET_DATES'; start: Date; end: Date }
   | { type: 'SET_DETAIL'; field: 'name' | 'email' | 'phone' | 'vehicleDescription' | 'notes'; value: string }
   | { type: 'GO_TO_STEP'; step: WizardStep }
+  | { type: 'EDIT_FROM_SUMMARY'; step: WizardStep }
   | { type: 'NEXT_STEP' }
   | { type: 'PREV_STEP' }
   | { type: 'RESET'; preSelection?: PreSelection };
@@ -44,6 +47,7 @@ const stepTitles: Record<WizardStep, string> = {
 function createInitialState(preSelection?: PreSelection): WizardState {
   return {
     currentStep: 1,
+    editingFromSummary: false,
     data: {
       selectedBoxId: preSelection?.boxId ?? null,
       roofType: null,
@@ -54,6 +58,7 @@ function createInitialState(preSelection?: PreSelection): WizardState {
       phone: '',
       vehicleDescription: '',
       notes: '',
+      roofTypeOther: '',
     },
   };
 }
@@ -64,7 +69,17 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
       return { ...state, data: { ...state.data, selectedBoxId: action.boxId } };
 
     case 'SET_ROOF_TYPE':
-      return { ...state, data: { ...state.data, roofType: action.roofType } };
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          roofType: action.roofType,
+          roofTypeOther: action.roofType !== 'other' ? '' : state.data.roofTypeOther,
+        },
+      };
+
+    case 'SET_ROOF_TYPE_OTHER':
+      return { ...state, data: { ...state.data, roofTypeOther: action.text } };
 
     case 'SET_DATES':
       return { ...state, data: { ...state.data, startDate: action.start, endDate: action.end } };
@@ -75,14 +90,24 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
     case 'GO_TO_STEP':
       return { ...state, currentStep: action.step };
 
+    case 'EDIT_FROM_SUMMARY':
+      return { ...state, currentStep: action.step, editingFromSummary: true };
+
     case 'NEXT_STEP': {
+      if (state.editingFromSummary) {
+        return { ...state, currentStep: 5, editingFromSummary: false };
+      }
       const next = Math.min(state.currentStep + 1, 5) as WizardStep;
       return { ...state, currentStep: next };
     }
 
     case 'PREV_STEP': {
+      // When editing from summary, "Nazaj" returns to summary
+      if (state.editingFromSummary) {
+        return { ...state, currentStep: 5, editingFromSummary: false };
+      }
       const prev = Math.max(state.currentStep - 1, 1) as WizardStep;
-      // Clear dates when leaving the date step
+      // Clear dates when leaving the date step during normal flow
       if (state.currentStep === 3) {
         return { ...state, currentStep: prev, data: { ...state.data, startDate: null, endDate: null } };
       }
@@ -102,7 +127,9 @@ function isStepValid(step: WizardStep, data: ReservationData): boolean {
     case 1:
       return data.selectedBoxId !== null;
     case 2:
-      return data.roofType !== null;
+      if (data.roofType === null) return false;
+      if (data.roofType === 'other') return data.roofTypeOther.trim().length > 0;
+      return true;
     case 3:
       return data.startDate !== null && data.endDate !== null;
     case 4:
@@ -151,7 +178,12 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
   if (!isOpen) return null;
 
   const completedSteps = new Set<number>();
-  for (let s = 1; s < currentStep; s++) completedSteps.add(s);
+  if (state.editingFromSummary) {
+    // When editing from summary, all steps have been visited
+    for (let s = 1; s <= 5; s++) if (s !== currentStep) completedSteps.add(s);
+  } else {
+    for (let s = 1; s < currentStep; s++) completedSteps.add(s);
+  }
 
   const canProceed = isStepValid(currentStep, data);
 
@@ -177,6 +209,7 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
       boxSize: box?.size ?? null,
       boxPricePerDay: box?.pricePerDay ?? null,
       roofType: data.roofType,
+      roofTypeOther: data.roofType === 'other' ? data.roofTypeOther : null,
       startDate: data.startDate ? formatDate(data.startDate) : '',
       endDate: data.endDate ? formatDate(data.endDate) : '',
       days,
@@ -263,6 +296,8 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
                 <StepHolderSelection
                   roofType={data.roofType}
                   onSelect={(roofType) => dispatch({ type: 'SET_ROOF_TYPE', roofType })}
+                  roofTypeOther={data.roofTypeOther}
+                  onOtherTextChange={(text) => dispatch({ type: 'SET_ROOF_TYPE_OTHER', text })}
                 />
               )}
               {currentStep === 3 && (() => {
@@ -296,7 +331,7 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
               {currentStep === 5 && (
                 <StepSummary
                   data={data}
-                  onGoToStep={(step) => dispatch({ type: 'GO_TO_STEP', step: step as WizardStep })}
+                  onGoToStep={(step) => dispatch({ type: 'EDIT_FROM_SUMMARY', step: step as WizardStep })}
                 />
               )}
             </>
@@ -325,7 +360,7 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
                   disabled={submitting}
                   className="px-6 py-2.5 rounded-xl bg-stone-200 dark:bg-zinc-700 text-zinc-700 dark:text-stone-300 font-medium hover:bg-stone-300 dark:hover:bg-zinc-600 disabled:opacity-50 transition-colors"
                 >
-                  Nazaj
+                  {state.editingFromSummary ? 'Nazaj na pregled' : 'Nazaj'}
                 </button>
               ) : (
                 <div />
@@ -348,7 +383,7 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
                       </svg>
                       Pošiljam...
                     </span>
-                  ) : currentStep === 5 ? 'Pošlji Povpraševanje' : 'Naprej'}
+                  ) : currentStep === 5 ? 'Pošlji Povpraševanje' : state.editingFromSummary ? 'Shrani & Pregled' : 'Naprej'}
                 </button>
               </div>
             </>

@@ -25,6 +25,7 @@ describe('sendInquiry', () => {
     estimatedTotal: 126,
     discountPercent: 10,
     deposit: 150,
+    roofTypeOther: null,
   };
 
   beforeEach(() => {
@@ -155,5 +156,21 @@ describe('sendInquiry', () => {
 
     const callArgs = mockSend.mock.calls[0][0];
     expect(callArgs.html).toContain('Navadna streha');
+  });
+
+  it('includes custom text for other roof type', async () => {
+    mockSend.mockResolvedValue({ id: 'email_other' });
+
+    const { sendInquiry } = await import('../sendInquiry');
+    await sendInquiry({
+      ...validPayload,
+      roofType: 'other',
+      roofTypeOther: 'Imam že svoje nosilce Thule',
+    });
+
+    const callArgs = mockSend.mock.calls[0][0];
+    expect(callArgs.html).toContain('Drugo');
+    expect(callArgs.html).toContain('Imam že svoje nosilce Thule');
+    expect(callArgs.text).toContain('Drugo: Imam že svoje nosilce Thule');
   });
 });

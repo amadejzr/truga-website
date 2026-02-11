@@ -118,6 +118,20 @@ describe('ReservationModal', () => {
     expect(screen.getByText('Naprej')).not.toBeDisabled();
   });
 
+  it('requires text input when Drugo roof type is selected', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<ReservationModal {...defaultProps} />);
+    selectBoxAndAdvance();
+
+    // Select "Drugo" — Naprej should still be disabled (no text entered)
+    fireEvent.click(screen.getByText('Drugo'));
+    expect(screen.getByText('Naprej')).toBeDisabled();
+
+    // Type into the textarea
+    await user.type(screen.getByPlaceholderText('Opišite vašo streho ali situacijo...'), 'Imam že svoje nosilce');
+    expect(screen.getByText('Naprej')).not.toBeDisabled();
+  });
+
   it('advances through steps 1-2-3', () => {
     render(<ReservationModal {...defaultProps} />);
 
@@ -432,6 +446,110 @@ describe('ReservationModal', () => {
 
       // Should show the price estimate section
       expect(screen.getByText('Ocena cene')).toBeInTheDocument();
+    });
+
+    describe('edit from summary', () => {
+      it('shows "Shrani & Pregled" and "Nazaj na pregled" buttons when editing from summary', async () => {
+        await navigateToStep5();
+
+        // Click "Uredi" on roof type section (2nd edit button → step 2)
+        const editButtons = screen.getAllByText('Uredi');
+        fireEvent.click(editButtons[1]);
+
+        expect(screen.getByText('Tip Strehe')).toBeInTheDocument();
+        expect(screen.getByText('Shrani & Pregled')).toBeInTheDocument();
+        expect(screen.getByText('Nazaj na pregled')).toBeInTheDocument();
+      });
+
+      it('jumps back to step 5 when clicking "Shrani & Pregled"', async () => {
+        await navigateToStep5();
+
+        // Click "Uredi" on roof type (step 2)
+        const editButtons = screen.getAllByText('Uredi');
+        fireEvent.click(editButtons[1]);
+
+        expect(screen.getByText('Tip Strehe')).toBeInTheDocument();
+
+        // Change selection and save
+        fireEvent.click(screen.getByText('Dvignjene letve'));
+        fireEvent.click(screen.getByText('Shrani & Pregled'));
+
+        // Should jump straight back to step 5
+        expect(screen.getByText('Pregled Povpraševanja')).toBeInTheDocument();
+        expect(screen.getByText('Dvignjene letve')).toBeInTheDocument();
+      });
+
+      it('returns to step 5 when clicking "Nazaj na pregled"', async () => {
+        await navigateToStep5();
+
+        // Click "Uredi" on dates (step 3)
+        const editButtons = screen.getAllByText('Uredi');
+        fireEvent.click(editButtons[2]);
+
+        expect(screen.getByText('Izberite Datum')).toBeInTheDocument();
+
+        // Click "Nazaj na pregled" to cancel edit
+        fireEvent.click(screen.getByText('Nazaj na pregled'));
+
+        // Should be back on step 5
+        expect(screen.getByText('Pregled Povpraševanja')).toBeInTheDocument();
+      });
+
+      it('preserves data after editing from summary', async () => {
+        await navigateToStep5();
+
+        // Verify original data
+        expect(screen.getByText('Navadna streha')).toBeInTheDocument();
+        expect(screen.getByText('Ana Krajnc')).toBeInTheDocument();
+
+        // Edit box (step 1), change selection
+        const editButtons = screen.getAllByText('Uredi');
+        fireEvent.click(editButtons[0]);
+
+        expect(screen.getByText('Izberite Strešni Kovček')).toBeInTheDocument();
+        fireEvent.click(screen.getByText('Standardni Kovček'));
+        fireEvent.click(screen.getByText('Shrani & Pregled'));
+
+        // Back on summary, new box shown, other data preserved
+        expect(screen.getByText('Pregled Povpraševanja')).toBeInTheDocument();
+        expect(screen.getByText('Standardni Kovček')).toBeInTheDocument();
+        expect(screen.getByText('Navadna streha')).toBeInTheDocument();
+        expect(screen.getByText('Ana Krajnc')).toBeInTheDocument();
+      });
+
+      it('does not show edit-mode buttons during normal forward flow', async () => {
+        render(<ReservationModal {...defaultProps} />);
+        selectBoxAndAdvance();
+
+        // On step 2 during normal flow
+        expect(screen.getByText('Naprej')).toBeInTheDocument();
+        expect(screen.queryByText('Shrani & Pregled')).not.toBeInTheDocument();
+        expect(screen.queryByText('Nazaj na pregled')).not.toBeInTheDocument();
+      });
+
+      it('clears editingFromSummary flag after returning to summary', async () => {
+        await navigateToStep5();
+
+        // Edit step 2
+        const editButtons = screen.getAllByText('Uredi');
+        fireEvent.click(editButtons[1]);
+        fireEvent.click(screen.getByText('Nazaj na pregled'));
+
+        // Back on step 5, should show normal "Pošlji Povpraševanje" not "Shrani & Pregled"
+        expect(screen.getByText('Pošlji Povpraševanje')).toBeInTheDocument();
+        expect(screen.queryByText('Shrani & Pregled')).not.toBeInTheDocument();
+      });
+
+      it('navigates to step 4 when editing customer details from summary', async () => {
+        await navigateToStep5();
+
+        // Click "Uredi" on customer section (4th edit button → step 4)
+        const editButtons = screen.getAllByText('Uredi');
+        fireEvent.click(editButtons[3]);
+
+        expect(screen.getByText('Vaši Podatki')).toBeInTheDocument();
+        expect(screen.getByText('Shrani & Pregled')).toBeInTheDocument();
+      });
     });
   });
 });

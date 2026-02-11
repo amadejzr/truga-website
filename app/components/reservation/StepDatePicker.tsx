@@ -65,6 +65,8 @@ export function StepDatePicker({
           <Calendar
             onDateSelect={onDateSelect}
             onHoverDateChange={setHoveredDate}
+            initialStartDate={startDate}
+            initialEndDate={endDate}
           />
         </div>
 

@@ -6,12 +6,14 @@ interface CalendarProps {
   onDateSelect?: (startDate: Date | null, endDate: Date | null) => void;
   onHoverDateChange?: (date: Date | null) => void;
   unavailableDates?: Date[];
+  initialStartDate?: Date | null;
+  initialEndDate?: Date | null;
 }
 
-export function Calendar({ onDateSelect, onHoverDateChange, unavailableDates = [] }: CalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+export function Calendar({ onDateSelect, onHoverDateChange, unavailableDates = [], initialStartDate, initialEndDate }: CalendarProps) {
+  const [currentMonth, setCurrentMonth] = useState(initialStartDate ?? new Date());
+  const [startDate, setStartDate] = useState<Date | null>(initialStartDate ?? null);
+  const [endDate, setEndDate] = useState<Date | null>(initialEndDate ?? null);
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
 
   const monthNames = [

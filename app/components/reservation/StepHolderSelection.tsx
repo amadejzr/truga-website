@@ -39,14 +39,22 @@ const ROOF_TYPE_OPTIONS: {
     description: 'Niste prepričani? Ni problema — pošljite nam fotografijo strehe vašega vozila in vam svetujemo.',
     image: '/normal_roof.png',
   },
+  {
+    id: 'other',
+    label: 'Drugo',
+    description: 'Imate že svoje nosilce ali pa niste našli ustrezne možnosti? Opišite svojo situacijo.',
+    image: '/normal_roof.png',
+  },
 ];
 
 interface StepHolderSelectionProps {
   roofType: RoofTypeChoice | null;
   onSelect: (roofType: RoofTypeChoice) => void;
+  roofTypeOther: string;
+  onOtherTextChange: (text: string) => void;
 }
 
-export function StepHolderSelection({ roofType, onSelect }: StepHolderSelectionProps) {
+export function StepHolderSelection({ roofType, onSelect, roofTypeOther, onOtherTextChange }: StepHolderSelectionProps) {
   const [tooltipId, setTooltipId] = useState<RoofTypeChoice | null>(null);
 
   return (
@@ -80,6 +88,13 @@ export function StepHolderSelection({ roofType, onSelect }: StepHolderSelectionP
                   {option.id === 'unsure' && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                       <span className="text-5xl font-bold text-white">?</span>
+                    </div>
+                  )}
+                  {option.id === 'other' && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                     </div>
                   )}
                   {isSelected && (
@@ -127,6 +142,18 @@ export function StepHolderSelection({ roofType, onSelect }: StepHolderSelectionP
           );
         })}
       </div>
+
+      {roofType === 'other' && (
+        <div className="max-w-xl mx-auto mt-4">
+          <textarea
+            value={roofTypeOther}
+            onChange={(e) => onOtherTextChange(e.target.value)}
+            placeholder="Opišite vašo streho ali situacijo..."
+            rows={3}
+            className="w-full rounded-2xl border-2 border-stone-200 dark:border-zinc-700 bg-stone-50 dark:bg-zinc-800 text-zinc-900 dark:text-stone-50 px-4 py-3 text-sm focus:outline-none focus:border-green-700 dark:focus:border-green-500 focus:ring-1 focus:ring-green-700/20 transition-all resize-none placeholder:text-zinc-400 dark:placeholder:text-stone-500"
+          />
+        </div>
+      )}
     </div>
   );
 }

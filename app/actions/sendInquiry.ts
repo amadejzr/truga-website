@@ -10,6 +10,7 @@ const ROOF_TYPE_LABELS: Record<string, string> = {
   'raised-rails': 'Dvignjene letve',
   'fixed-points': 'Fiksne točke',
   'unsure': 'Ne vem',
+  'other': 'Drugo',
 };
 
 interface InquiryPayload {
@@ -17,6 +18,7 @@ interface InquiryPayload {
   boxSize: string | null;
   boxPricePerDay: number | null;
   roofType: string | null;
+  roofTypeOther: string | null;
   startDate: string;
   endDate: string;
   days: number;
@@ -43,7 +45,10 @@ export async function sendInquiry(payload: InquiryPayload): Promise<{ success: b
     return { success: false, error: 'Email ni konfiguriran. Prosimo, kontaktirajte nas neposredno.' };
   }
 
-  const roofLabel = payload.roofType ? (ROOF_TYPE_LABELS[payload.roofType] ?? payload.roofType) : 'Ni izbrano';
+  const roofBaseLabel = payload.roofType ? (ROOF_TYPE_LABELS[payload.roofType] ?? payload.roofType) : 'Ni izbrano';
+  const roofLabel = payload.roofType === 'other' && payload.roofTypeOther
+    ? `${roofBaseLabel}: ${payload.roofTypeOther}`
+    : roofBaseLabel;
 
   const htmlBody = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #fafaf9; border-radius: 16px; overflow: hidden; border: 1px solid #e7e5e4;">
