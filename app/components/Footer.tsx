@@ -4,7 +4,6 @@ import { Logo } from './Logo';
 export function Footer() {
   const navLinks = [
     { href: '/', label: 'Domov' },
-    { href: '/products', label: 'Izdelki' },
     { href: '/about', label: 'O nas' },
     { href: '/faq', label: 'Pogosta vprašanja' },
     { href: '/contact', label: 'Kontakt' },

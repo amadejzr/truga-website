@@ -2,7 +2,6 @@
 
 import { memo } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { roofBoxes } from '../data/products';
 
 interface ProductComparisonGridProps {
@@ -63,19 +62,13 @@ function ProductComparisonGrid({ onReservationClick }: ProductComparisonGridProp
               <span className="text-sm text-zinc-500 dark:text-stone-500"> / dan</span>
             </div>
 
-            <div className="space-y-2.5 mt-auto">
+            <div className="mt-auto">
               <button
                 onClick={() => onReservationClick(box.id)}
                 className="w-full bg-gradient-to-r from-green-700 to-green-800 hover:from-green-800 hover:to-green-900 text-stone-50 font-bold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
               >
                 Rezerviraj
               </button>
-              <Link
-                href={`/products/${box.slug}`}
-                className="block w-full text-center text-sm font-semibold text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 py-2 transition-colors"
-              >
-                Več Informacij
-              </Link>
             </div>
           </div>
         </div>
