@@ -4,10 +4,11 @@ import { useState } from 'react';
 
 interface CalendarProps {
   onDateSelect?: (startDate: Date | null, endDate: Date | null) => void;
+  onHoverDateChange?: (date: Date | null) => void;
   unavailableDates?: Date[];
 }
 
-export function Calendar({ onDateSelect, unavailableDates = [] }: CalendarProps) {
+export function Calendar({ onDateSelect, onHoverDateChange, unavailableDates = [] }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -110,8 +111,16 @@ export function Calendar({ onDateSelect, unavailableDates = [] }: CalendarProps)
         <button
           key={day}
           onClick={() => handleDateClick(date)}
-          onMouseEnter={() => !unavailable && setHoveredDate(date)}
-          onMouseLeave={() => setHoveredDate(null)}
+          onMouseEnter={() => {
+            if (!unavailable) {
+              setHoveredDate(date);
+              onHoverDateChange?.(date);
+            }
+          }}
+          onMouseLeave={() => {
+            setHoveredDate(null);
+            onHoverDateChange?.(null);
+          }}
           disabled={unavailable}
           className={`
             aspect-square rounded-xl font-semibold transition-all duration-200

@@ -17,6 +17,7 @@ export interface RoofBox {
   color: string;
   isPopular: boolean;
   description: string;
+  deposit: number;
   features: string[];
   included: string[];
 }
@@ -45,6 +46,7 @@ export const roofBoxes: RoofBox[] = [
     lockType: 'Centralna ključavnica',
     color: 'Črna mat',
     isPopular: false,
+    deposit: 100,
     description: 'Kompaktni strešni kovček je idealen za manjša vozila in vikend izlete. Njegova aerodinamična oblika zmanjšuje porabo goriva in hrup med vožnjo. Enostavna montaža in demontaža omogočata hitro namestitev brez orodja.',
     features: [
       'Aerodinamična oblika za manjšo porabo goriva',
@@ -85,6 +87,7 @@ export const roofBoxes: RoofBox[] = [
     lockType: 'Centralna ključavnica',
     color: 'Antracit',
     isPopular: true,
+    deposit: 150,
     description: 'Naš najbolj priljubljen model združuje optimalno prostornino s praktičnostjo uporabe. Primeren za večino družinskih vozil in ponuja dovolj prostora za prtljago 3-4 oseb na daljšem potovanju.',
     features: [
       'Optimalna velikost za družinska vozila',
@@ -126,6 +129,7 @@ export const roofBoxes: RoofBox[] = [
     lockType: 'SKS ključavnica',
     color: 'Titan mat',
     isPopular: false,
+    deposit: 200,
     description: 'Družinski strešni kovček ponuja izjemno prostornino za daljša potovanja celotne družine. Široko odpiranje omogoča enostavno nalaganje tudi večjih predmetov, kot so smuči ali golf oprema.',
     features: [
       'Široko odpiranje za velike predmete',
@@ -167,6 +171,7 @@ export const roofBoxes: RoofBox[] = [
     lockType: 'Premium ključavnica z alarmom',
     color: 'Črna sijajna',
     isPopular: false,
+    deposit: 250,
     description: 'Premium XL je naš največji in najbolj dovršen strešni kovček. Namenjen zahtevnim uporabnikom, ki potrebujejo maksimalno prostornino brez kompromisov glede kakovosti in varnosti.',
     features: [
       'Največja prostornina v ponudbi',

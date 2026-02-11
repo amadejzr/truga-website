@@ -44,7 +44,7 @@ const faqItems: FAQItem[] = [
   {
     category: 'Cene',
     question: 'Kakšne so cene najema?',
-    answer: 'Cene se začnejo pri 15€ na dan za manjše kovčke in 20-25€ za večje modele. Za najem daljši od 7 dni ponujamo popuste do 20%.',
+    answer: 'Cene se začnejo pri 15€ na dan za manjše kovčke in 20-25€ za večje modele. Pri daljšem najemu ponujamo popuste: 5% (4-6 dni), 10% (7-13 dni), 15% (14-20 dni), 20% (21-30 dni). Za najem nad 30 dni nas kontaktirajte za posebno ponudbo.',
   },
   {
     category: 'Cene',

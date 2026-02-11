@@ -1,5 +1,5 @@
 import { getRoofBoxById, type ReservationData, type RoofTypeChoice } from '../../data/products';
-import { calculatePricing } from '../../utils/pricing';
+import { calculatePricing, formatDaysWord } from '../../utils/pricing';
 
 interface StepSummaryProps {
   data: ReservationData;
@@ -28,7 +28,7 @@ export function StepSummary({ data, onGoToStep }: StepSummaryProps) {
       : 0;
 
   const pricing = box
-    ? calculatePricing(box.pricePerDay, null, days)
+    ? calculatePricing(box.pricePerDay, null, days, box.deposit)
     : null;
 
   return (
@@ -91,7 +91,7 @@ export function StepSummary({ data, onGoToStep }: StepSummaryProps) {
           {data.startDate && data.endDate && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-zinc-900 dark:text-stone-50">{formatDate(data.startDate)} — {formatDate(data.endDate)}</span>
-              <span className="font-medium text-zinc-700 dark:text-stone-300">{days} {days === 1 ? 'dan' : days === 2 ? 'dneva' : days <= 4 ? 'dnevi' : 'dni'}</span>
+              <span className="font-medium text-zinc-700 dark:text-stone-300">{days} {formatDaysWord(days)}</span>
             </div>
           )}
         </div>
@@ -142,6 +142,12 @@ export function StepSummary({ data, onGoToStep }: StepSummaryProps) {
                 <span>Skupaj</span>
                 <span>{pricing.total}€</span>
               </div>
+              {pricing.deposit > 0 && (
+                <div className="flex justify-between text-stone-400 text-xs pt-1">
+                  <span>Kavcija (vračljiva)</span>
+                  <span>{pricing.deposit}€</span>
+                </div>
+              )}
             </div>
             <p className="text-xs text-stone-400 mt-3">Končna cena bo potrjena po pregledu vaših potreb.</p>
           </div>

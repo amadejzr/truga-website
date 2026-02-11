@@ -28,7 +28,7 @@ export function Logo({ className = '', size = 'md', showText = true, textClassNa
       />
       {showText && (
         <span className={`${sizes[size].text} font-bold tracking-tight pb-1 ${textClassName || defaultTextColor}`}>
-          Truga
+          Upbox
         </span>
       )}
     </div>

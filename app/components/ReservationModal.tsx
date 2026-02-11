@@ -1,7 +1,10 @@
 'use client';
 
-import { useReducer, useRef, useEffect } from 'react';
+import { useReducer, useRef, useEffect, useState } from 'react';
 import type { ReservationData, RoofTypeChoice } from '../data/products';
+import { getRoofBoxById } from '../data/products';
+import { sendInquiry } from '../actions/sendInquiry';
+import { calculatePricing } from '../utils/pricing';
 import { StepIndicator } from './reservation/StepIndicator';
 import { StepProductSelection } from './reservation/StepProductSelection';
 import { StepHolderSelection } from './reservation/StepHolderSelection';
@@ -79,6 +82,10 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
 
     case 'PREV_STEP': {
       const prev = Math.max(state.currentStep - 1, 1) as WizardStep;
+      // Clear dates when leaving the date step
+      if (state.currentStep === 3) {
+        return { ...state, currentStep: prev, data: { ...state.data, startDate: null, endDate: null } };
+      }
       return { ...state, currentStep: prev };
     }
 
@@ -93,7 +100,7 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
 function isStepValid(step: WizardStep, data: ReservationData): boolean {
   switch (step) {
     case 1:
-      return true; // Box selection is optional
+      return data.selectedBoxId !== null;
     case 2:
       return data.roofType !== null;
     case 3:
@@ -120,6 +127,9 @@ interface ReservationModalProps {
 
 export function ReservationModal({ isOpen, onClose, preSelection }: ReservationModalProps) {
   const [state, dispatch] = useReducer(wizardReducer, preSelection, createInitialState);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<'success' | 'error' | null>(null);
+  const [submitError, setSubmitError] = useState('');
   const contentRef = useRef<HTMLDivElement>(null);
 
   const { currentStep, data } = state;
@@ -133,6 +143,8 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
   useEffect(() => {
     if (isOpen) {
       dispatch({ type: 'RESET', preSelection });
+      setSubmitResult(null);
+      setSubmitError('');
     }
   }, [isOpen, preSelection]);
 
@@ -143,11 +155,54 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
 
   const canProceed = isStepValid(currentStep, data);
 
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setSubmitResult(null);
+
+    const box = data.selectedBoxId ? getRoofBoxById(data.selectedBoxId) : null;
+    const days =
+      data.startDate && data.endDate
+        ? Math.ceil((data.endDate.getTime() - data.startDate.getTime()) / (1000 * 60 * 60 * 24))
+        : 0;
+
+    const pricing = box && days > 0
+      ? calculatePricing(box.pricePerDay, null, days, box.deposit)
+      : null;
+
+    const formatDate = (d: Date) =>
+      d.toLocaleDateString('sl-SI', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    const result = await sendInquiry({
+      boxTitle: box?.title ?? null,
+      boxSize: box?.size ?? null,
+      boxPricePerDay: box?.pricePerDay ?? null,
+      roofType: data.roofType,
+      startDate: data.startDate ? formatDate(data.startDate) : '',
+      endDate: data.endDate ? formatDate(data.endDate) : '',
+      days,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      vehicleDescription: data.vehicleDescription,
+      notes: data.notes,
+      estimatedTotal: pricing?.total ?? null,
+      discountPercent: pricing?.discountPercent ?? 0,
+      deposit: box?.deposit ?? null,
+    });
+
+    setSubmitting(false);
+
+    if (result.success) {
+      setSubmitResult('success');
+    } else {
+      setSubmitResult('error');
+      setSubmitError(result.error ?? 'Napaka pri pošiljanju.');
+    }
+  };
+
   const handleNext = () => {
     if (currentStep === 5) {
-      console.log('Inquiry submitted:', data);
-      alert('Povpraševanje oddano! V kratkem vas bomo kontaktirali.');
-      onClose();
+      handleSubmit();
       return;
     }
     dispatch({ type: 'NEXT_STEP' });
@@ -159,7 +214,7 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-stone-50 dark:bg-zinc-900 rounded-[2rem] max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+      <div className="bg-stone-50 dark:bg-zinc-900 rounded-[2rem] max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl">
         {/* Header */}
         <div className="bg-gradient-to-r from-zinc-800 to-green-800 dark:from-zinc-900 dark:to-green-900 text-stone-50 px-6 py-5 rounded-t-[2rem] flex items-center justify-between shrink-0">
           <div>
@@ -184,66 +239,120 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
 
         {/* Step Content */}
         <div ref={contentRef} className="flex-1 overflow-y-auto">
-          {currentStep === 1 && (
-            <StepProductSelection
-              selectedBoxId={data.selectedBoxId}
-              onSelectBox={(boxId) => dispatch({ type: 'SELECT_BOX', boxId })}
-            />
-          )}
-          {currentStep === 2 && (
-            <StepHolderSelection
-              roofType={data.roofType}
-              onSelect={(roofType) => dispatch({ type: 'SET_ROOF_TYPE', roofType })}
-            />
-          )}
-          {currentStep === 3 && (
-            <StepDatePicker
-              startDate={data.startDate}
-              endDate={data.endDate}
-              onDateSelect={(start, end) => {
-                if (start && end) dispatch({ type: 'SET_DATES', start, end });
-              }}
-            />
-          )}
-          {currentStep === 4 && (
-            <StepCustomerDetails
-              name={data.name}
-              email={data.email}
-              phone={data.phone}
-              vehicleDescription={data.vehicleDescription}
-              notes={data.notes}
-              onChange={(field, value) => dispatch({ type: 'SET_DETAIL', field, value })}
-            />
-          )}
-          {currentStep === 5 && (
-            <StepSummary
-              data={data}
-              onGoToStep={(step) => dispatch({ type: 'GO_TO_STEP', step: step as WizardStep })}
-            />
+          {submitResult === 'success' ? (
+            <div className="p-6 flex flex-col items-center justify-center min-h-[300px] text-center">
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-green-700 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-stone-50 mb-2">Povpraševanje oddano!</h3>
+              <p className="text-zinc-600 dark:text-stone-400 max-w-sm">
+                Hvala za vaše povpraševanje. V kratkem vas bomo kontaktirali na <span className="font-medium text-zinc-900 dark:text-stone-200">{data.email}</span>.
+              </p>
+            </div>
+          ) : (
+            <>
+              {currentStep === 1 && (
+                <StepProductSelection
+                  selectedBoxId={data.selectedBoxId}
+                  onSelectBox={(boxId) => dispatch({ type: 'SELECT_BOX', boxId })}
+                />
+              )}
+              {currentStep === 2 && (
+                <StepHolderSelection
+                  roofType={data.roofType}
+                  onSelect={(roofType) => dispatch({ type: 'SET_ROOF_TYPE', roofType })}
+                />
+              )}
+              {currentStep === 3 && (() => {
+                const selectedBox = data.selectedBoxId ? getRoofBoxById(data.selectedBoxId) : null;
+                const needsHolder = data.roofType !== null && data.roofType !== 'have-own';
+                return (
+                  <StepDatePicker
+                    startDate={data.startDate}
+                    endDate={data.endDate}
+                    onDateSelect={(start, end) => {
+                      if (start && end) dispatch({ type: 'SET_DATES', start, end });
+                    }}
+                    boxPricePerDay={selectedBox?.pricePerDay ?? null}
+                    boxTitle={selectedBox?.title ?? null}
+                    deposit={selectedBox?.deposit ?? null}
+                    needsHolder={needsHolder}
+                    holderEstimatePricePerDay={5}
+                  />
+                );
+              })()}
+              {currentStep === 4 && (
+                <StepCustomerDetails
+                  name={data.name}
+                  email={data.email}
+                  phone={data.phone}
+                  vehicleDescription={data.vehicleDescription}
+                  notes={data.notes}
+                  onChange={(field, value) => dispatch({ type: 'SET_DETAIL', field, value })}
+                />
+              )}
+              {currentStep === 5 && (
+                <StepSummary
+                  data={data}
+                  onGoToStep={(step) => dispatch({ type: 'GO_TO_STEP', step: step as WizardStep })}
+                />
+              )}
+            </>
           )}
         </div>
 
         {/* Footer */}
         <div className="border-t border-stone-200 dark:border-zinc-800 px-6 py-4 flex items-center justify-between shrink-0 bg-stone-50 dark:bg-zinc-900 rounded-b-[2rem]">
-          {currentStep > 1 ? (
-            <button
-              type="button"
-              onClick={handleBack}
-              className="px-6 py-2.5 rounded-xl bg-stone-200 dark:bg-zinc-700 text-zinc-700 dark:text-stone-300 font-medium hover:bg-stone-300 dark:hover:bg-zinc-600 transition-colors"
-            >
-              Nazaj
-            </button>
+          {submitResult === 'success' ? (
+            <>
+              <div />
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-green-700 to-green-800 hover:from-green-800 hover:to-green-900 text-stone-50 font-bold transition-all shadow-lg hover:shadow-xl"
+              >
+                Zapri
+              </button>
+            </>
           ) : (
-            <div />
+            <>
+              {currentStep > 1 ? (
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  disabled={submitting}
+                  className="px-6 py-2.5 rounded-xl bg-stone-200 dark:bg-zinc-700 text-zinc-700 dark:text-stone-300 font-medium hover:bg-stone-300 dark:hover:bg-zinc-600 disabled:opacity-50 transition-colors"
+                >
+                  Nazaj
+                </button>
+              ) : (
+                <div />
+              )}
+              <div className="flex items-center gap-3">
+                {submitResult === 'error' && (
+                  <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={!canProceed || submitting}
+                  className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-green-700 to-green-800 hover:from-green-800 hover:to-green-900 disabled:from-stone-300 disabled:to-stone-400 disabled:cursor-not-allowed text-stone-50 font-bold transition-all shadow-lg hover:shadow-xl disabled:shadow-none"
+                >
+                  {submitting ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Pošiljam...
+                    </span>
+                  ) : currentStep === 5 ? 'Pošlji Povpraševanje' : 'Naprej'}
+                </button>
+              </div>
+            </>
           )}
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={!canProceed}
-            className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-green-700 to-green-800 hover:from-green-800 hover:to-green-900 disabled:from-stone-300 disabled:to-stone-400 disabled:cursor-not-allowed text-stone-50 font-bold transition-all shadow-lg hover:shadow-xl disabled:shadow-none"
-          >
-            {currentStep === 5 ? 'Pošlji Povpraševanje' : 'Naprej'}
-          </button>
         </div>
       </div>
     </div>

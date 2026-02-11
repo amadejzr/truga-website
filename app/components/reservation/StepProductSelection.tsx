@@ -13,7 +13,7 @@ export function StepProductSelection({
   return (
     <div className="p-6">
       <p className="text-zinc-600 dark:text-stone-400 text-center mb-6">
-        Izberite strešni kovček ali preskočite ta korak.
+        Izberite strešni kovček za nadaljevanje.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
