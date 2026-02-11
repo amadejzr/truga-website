@@ -38,7 +38,7 @@ export function StepProductSelection({
                 </div>
               )}
               <div className="relative h-32 bg-stone-100 dark:bg-zinc-800">
-                <Image src={box.image} alt={box.title} fill className="object-cover" unoptimized />
+                <Image src={box.image} alt={box.title} fill className="object-cover object-top" unoptimized />
               </div>
               <div className="p-4">
                 <div className="flex items-center justify-between mb-1">
