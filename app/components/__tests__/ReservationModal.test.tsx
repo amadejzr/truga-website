@@ -53,12 +53,11 @@ describe('ReservationModal', () => {
     expect(screen.getByText('Korak 1 od 5')).toBeInTheDocument();
   });
 
-  it('shows all 4 roof box options on step 1', () => {
+  it('shows all 3 roof box options on step 1', () => {
     render(<ReservationModal {...defaultProps} />);
     expect(screen.getByText('Kompaktni Kovček')).toBeInTheDocument();
     expect(screen.getByText('Standardni Kovček')).toBeInTheDocument();
     expect(screen.getByText('Družinski Kovček')).toBeInTheDocument();
-    expect(screen.getByText('Premium XL')).toBeInTheDocument();
   });
 
   it('disables Naprej on step 1 until a box is selected', () => {

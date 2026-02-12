@@ -166,13 +166,17 @@ export function ReservationModal({ isOpen, onClose, preSelection }: ReservationM
     contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentStep]);
 
-  // Reset when modal opens
+  // Reset when modal opens + lock body scroll
   useEffect(() => {
     if (isOpen) {
       dispatch({ type: 'RESET', preSelection });
       setSubmitResult(null);
       setSubmitError('');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
+    return () => { document.body.style.overflow = ''; };
   }, [isOpen, preSelection]);
 
   if (!isOpen) return null;
